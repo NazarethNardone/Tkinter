@@ -1,0 +1,94 @@
+from tkinter import *
+from tkinter.messagebox import *
+
+# Ventana principal
+root = Tk()
+root.title("Gestor de Contactos")
+
+# Marco principal para contener los elementos
+marcoprincipal = Frame(root)
+marcoprincipal.pack(padx=10, pady=10)
+
+# --- CAMPOS DE ENTRADA (Entry) Y ETIQUETAS (Label) ---
+etiqueta_nombre = Label(marcoprincipal, text="Nombre:")
+etiqueta_nombre.grid(row=0, column=0, padx=5, pady=5)
+
+entrada_nombre = Entry(marcoprincipal, width=25)
+entrada_nombre.grid(row=0, column=1, padx=5, pady=5)
+
+etiqueta_telefono = Label(marcoprincipal, text="Teléfono:")
+etiqueta_telefono.grid(row=1, column=0, padx=5, pady=5)
+
+entrada_telefono = Entry(marcoprincipal, width=25)
+entrada_telefono.grid(row=1, column=1, padx=5, pady=5)
+
+# --- LISTA DE CONTACTOS (Listbox) ---
+# Con selectmode=MULTIPLE se permite seleccionar varios elementos a la vez
+lista_contactos = Listbox(marcoprincipal, width=40, height=10, selectmode=MULTIPLE)
+lista_contactos.grid(row=3, column=0, columnspan=2, padx=5, pady=10)
+
+
+# --- FUNCIONES ---
+
+def agregar_contacto():
+    nombre = entrada_nombre.get()
+    telefono = entrada_telefono.get()
+    
+    # 1. Validación de campos vacíos
+    if nombre == "" or telefono == "":
+        showwarning(title="Atención", message="Por favor, complete ambos campos.")
+        return
+
+    # 2. Validación de Nombre (solo letras y espacios)
+    letras_permitidas = "abcdefghijklmnopqrstuvwxyzáéíóúñABCDEFGHIJKLMNOPQRSTUVWXYZÁÉÍÓÚÑ "
+    nombre_valido = True
+    for caracter in nombre:
+        if caracter not in letras_permitidas:
+            nombre_valido = False
+
+    if nombre_valido == False:
+        showwarning(title="Error en Nombre", message="El campo 'Nombre' solo puede contener letras.")
+        return
+
+    # 3. Validación de Teléfono (solo números)
+    numeros_permitidos = "0123456789"
+    telefono_valido = True
+    for caracter in telefono:
+        if caracter not in numeros_permitidos:
+            telefono_valido = False
+
+    if telefono_valido == False:
+        showwarning(title="Error en Teléfono", message="El campo 'Teléfono' solo puede contener números.")
+        return
+
+    # Si pasa las validaciones, agregamos el contacto a la Listbox
+    contacto = f"{nombre} - {telefono}"
+    lista_contactos.insert(END, contacto)
+    
+    # Limpiamos las cajas de texto (Entry)
+    entrada_nombre.delete(0, END)
+    entrada_telefono.delete(0, END)
+
+
+def eliminar_contacto():
+    # curselection() devuelve una tupla con los índices seleccionados
+    seleccionados = lista_contactos.curselection()
+    
+    # Validación simple: verificar que haya seleccionado al menos uno antes de borrar
+    if len(seleccionados) == 0:
+        showwarning(title="Atención", message="Seleccione al menos un contacto para eliminar.")
+        return
+
+    # Eliminamos en orden inverso para no desorganizar los índices
+    for i in reversed(seleccionados):
+        lista_contactos.delete(i)
+
+
+# --- BOTONES (Button) ---
+boton_agregar = Button(marcoprincipal, text="Agregar Contacto", command=agregar_contacto)
+boton_agregar.grid(row=2, column=0, columnspan=2, pady=5)
+
+boton_eliminar = Button(marcoprincipal, text="Eliminar Seleccionado(s)", command=eliminar_contacto)
+boton_eliminar.grid(row=4, column=0, columnspan=2, pady=5)
+
+root.mainloop()
